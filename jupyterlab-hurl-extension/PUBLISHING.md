@@ -56,10 +56,10 @@ cd jupyterlab-hurl-extension
 npm login
 
 # Install dependencies
-jlpm install
+npm install
 
 # Build the extension
-jlpm build:prod
+npm run build:prod
 
 # Test package creation (doesn't publish)
 npm pack
@@ -123,9 +123,9 @@ Before publishing a new version:
 Check the GitHub Actions logs for TypeScript or build errors:
 ```bash
 cd jupyterlab-hurl-extension
-jlpm clean:all
-jlpm install
-jlpm build:prod
+npm run clean:all
+npm install
+npm run build:prod
 ```
 
 ### Permission Denied

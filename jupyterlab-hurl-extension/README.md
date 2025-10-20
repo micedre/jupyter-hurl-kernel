@@ -18,16 +18,16 @@ This JupyterLab extension provides syntax highlighting for Hurl files in Jupyter
 cd jupyterlab-hurl-extension
 
 # Install dependencies
-jlpm install
+npm install
 
 # Build the extension
-jlpm build
+npm run build
 
 # Link the extension to JupyterLab
 jupyter labextension develop . --overwrite
 
 # Rebuild the extension TypeScript source after making changes
-jlpm build
+npm run build
 ```
 
 2. Restart JupyterLab and refresh your browser
@@ -38,8 +38,8 @@ jlpm build
 cd jupyterlab-hurl-extension
 
 # Install dependencies and build
-jlpm install
-jlpm build:prod
+npm install
+npm run build:prod
 
 # Install the extension
 jupyter labextension install .
@@ -61,7 +61,7 @@ You can watch the source directory and run JupyterLab simultaneously in differen
 
 ```bash
 # Terminal 1: Watch the source directory
-jlpm watch
+npm run watch
 
 # Terminal 2: Run JupyterLab
 jupyter lab
@@ -86,7 +86,7 @@ jupyter labextension uninstall jupyterlab-hurl-extension
 
 2. Check for build errors:
    ```bash
-   jlpm build
+   npm run build
    ```
 
 3. Clear JupyterLab cache:

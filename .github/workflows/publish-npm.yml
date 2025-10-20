@@ -57,13 +57,12 @@ jobs:
       - name: Install dependencies
         working-directory: jupyterlab-hurl-extension
         run: |
-          npm install -g jlpm
-          jlpm install
+          npm install
 
       - name: Build extension
         working-directory: jupyterlab-hurl-extension
         run: |
-          jlpm build:prod
+          npm run build:prod
 
       - name: Verify build
         working-directory: jupyterlab-hurl-extension
