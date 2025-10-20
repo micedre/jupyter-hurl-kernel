@@ -182,6 +182,36 @@ Verbose mode (complete details):
 GET https://www.insee.fr
 ```
 
+## Features
+
+### Autocompletion
+
+The kernel provides intelligent autocompletion for Hurl syntax. Press `Tab` to trigger autocompletion:
+
+- **HTTP Methods**: `GET`, `POST`, `PUT`, `DELETE`, `PATCH`, `HEAD`, `OPTIONS`, etc.
+- **Common Headers**: `Content-Type:`, `Authorization:`, `Accept:`, `User-Agent:`, etc.
+- **Hurl Sections**: `[Asserts]`, `[Captures]`, `[QueryStringParams]`, `[FormParams]`, etc.
+- **Magic Lines**: `%%include`, `%%verbose`
+- **Content Types**: When typing `Content-Type:`, get suggestions for common MIME types
+
+The autocompletion is context-aware and will suggest relevant completions based on where your cursor is positioned.
+
+### Documentation Tooltips
+
+Hover over or press `Shift+Tab` on keywords to see documentation:
+
+- **HTTP Methods**: See descriptions of what each HTTP method does
+- **Hurl Sections**: Get examples and explanations for each section type
+- **Magic Lines**: Learn what each magic line does
+
+Example: Place your cursor on `GET` and press `Shift+Tab` to see:
+```
+HTTP GET Method
+
+GET method requests a representation of the specified resource.
+Requests using GET should only retrieve data.
+```
+
 ## How It Works
 
 The kernel works by:
