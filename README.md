@@ -280,6 +280,32 @@ To modify the kernel:
 
 4. Restart your Jupyter notebook kernel to test changes
 
+### Running Tests
+
+```bash
+# Build the package to verify
+uv build
+
+# Check the distribution
+uv tool run twine check dist/*
+```
+
+### Releasing a New Version
+
+This project uses GitHub Actions with PyPI trusted publishing for releases.
+
+1. Update the version in `pyproject.toml`
+2. Commit and push your changes
+3. Create and push a new tag:
+   ```bash
+   git tag v0.1.1
+   git push origin v0.1.1
+   ```
+4. Create a GitHub release from the tag
+5. The GitHub Action will automatically build and publish to PyPI
+
+For more details on setting up PyPI trusted publishing, see [.github/PYPI_SETUP.md](.github/PYPI_SETUP.md).
+
 ## Uninstallation
 
 To remove the kernel:
