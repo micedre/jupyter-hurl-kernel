@@ -9,5 +9,15 @@
   "display_name": "Hurl",
   "language": "hurl",
   "interrupt_mode": "signal",
-  "env": {}
+  "env": {},
+  "metadata": {
+    "debugger": false
+  },
+  "language_info": {
+    "name": "hurl",
+    "mimetype": "text/x-hurl",
+    "file_extension": ".hurl",
+    "codemirror_mode": "hurl",
+    "pygments_lexer": "text"
+  }
 }
