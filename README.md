@@ -137,11 +137,50 @@ HTTP 200
 jsonpath "$.slideshow.title" == "Sample Slide Show"
 ```
 
+**Example 5: Include response headers (using `%%include`)**
+```hurl
+%%include
+GET https://api.github.com/users/octocat
+```
+
+**Example 6: Verbose output with all details (using `%%verbose`)**
+```hurl
+%%verbose
+GET https://api.github.com/users/octocat
+```
+
 4. Run the cell (Shift+Enter) to execute the Hurl command
 
 The kernel will display:
 - HTTP response output
 - Any errors or validation failures
+
+### Magic Lines
+
+You can control the output level using magic lines at the start of cells. These magic lines correspond to Hurl's command-line flags:
+
+- **No magic line** (default) - Shows only the response body
+- `%%include` - Shows response headers and body (equivalent to `hurl --include`)
+- `%%verbose` - Shows all information including request details, response headers, body, timing, etc. (equivalent to `hurl --verbose`)
+
+**Examples:**
+
+Normal output (body only):
+```hurl
+GET https://www.insee.fr
+```
+
+Include mode (headers + body):
+```hurl
+%%include
+GET https://www.insee.fr
+```
+
+Verbose mode (complete details):
+```hurl
+%%verbose
+GET https://www.insee.fr
+```
 
 ## How It Works
 

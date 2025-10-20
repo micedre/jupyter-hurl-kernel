@@ -1,5 +1,6 @@
 """Hurl Jupyter Kernel implementation."""
 
+import re
 import subprocess
 import tempfile
 from pathlib import Path
@@ -41,6 +42,32 @@ class HurlKernel(Kernel):
                 self.hurl_version = "unknown"
         except (FileNotFoundError, subprocess.TimeoutExpired):
             self.hurl_version = None
+
+    def _parse_magic_line(self, code):
+        """Parse magic line (%%include or %%verbose) from code.
+
+        Args:
+            code: The code to parse
+
+        Returns:
+            tuple: (hurl_code, mode) where mode is 'normal', 'include', or 'verbose'
+        """
+        lines = code.split('\n')
+        mode = 'normal'
+        hurl_code_lines = []
+
+        for line in lines:
+            if line.strip().startswith('%%'):
+                # Parse magic line
+                magic = line.strip()[2:].lower()
+                if magic == 'include':
+                    mode = 'include'
+                elif magic == 'verbose':
+                    mode = 'verbose'
+            else:
+                hurl_code_lines.append(line)
+
+        return '\n'.join(hurl_code_lines), mode
 
     def do_execute(
         self,
@@ -90,17 +117,38 @@ class HurlKernel(Kernel):
                 "traceback": [error_message],
             }
 
+        # Parse magic lines and get hurl code
+        hurl_code, mode = self._parse_magic_line(code)
+
+        if not hurl_code.strip():
+            return {
+                "status": "ok",
+                "execution_count": self.execution_count,
+                "payload": [],
+                "user_expressions": {},
+            }
+
         # Create a temporary file to store the Hurl code
         with tempfile.NamedTemporaryFile(
             mode="w", suffix=".hurl", delete=False
         ) as f:
-            f.write(code)
+            f.write(hurl_code)
             hurl_file = f.name
 
         try:
+            # Build hurl command based on mode
+            cmd = ["hurl", "--color", hurl_file]
+
+            if mode == 'include':
+                # --include shows response headers and body
+                cmd.insert(1, "--include")
+            elif mode == 'verbose':
+                # --verbose shows all information (request, response, headers, timing, etc.)
+                cmd.insert(1, "--verbose")
+
             # Execute hurl command
             result = subprocess.run(
-                ["hurl", "--color", hurl_file],
+                cmd,
                 capture_output=True,
                 text=True,
                 timeout=30,
