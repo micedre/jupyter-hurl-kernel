@@ -1,0 +1,95 @@
+name: Publish JupyterLab Extension to npm
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 0.1.0)'
+        required: true
+        type: string
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # Required for npm provenance
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install JupyterLab
+        run: |
+          pip install jupyterlab>=4.0.0
+
+      - name: Get version from tag or input
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=${{ inputs.version }}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Update package.json version
+        working-directory: jupyterlab-hurl-extension
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          npm version $VERSION --no-git-tag-version
+          cat package.json | grep version
+
+      - name: Install dependencies
+        working-directory: jupyterlab-hurl-extension
+        run: |
+          npm install -g jlpm
+          jlpm install
+
+      - name: Build extension
+        working-directory: jupyterlab-hurl-extension
+        run: |
+          jlpm build:prod
+
+      - name: Verify build
+        working-directory: jupyterlab-hurl-extension
+        run: |
+          ls -la lib/
+          test -f lib/index.js || (echo "Build failed: lib/index.js not found" && exit 1)
+          test -f lib/index.d.ts || (echo "Build failed: lib/index.d.ts not found" && exit 1)
+
+      - name: Pack extension
+        working-directory: jupyterlab-hurl-extension
+        run: |
+          npm pack
+          ls -la *.tgz
+
+      - name: Publish to npm
+        working-directory: jupyterlab-hurl-extension
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --access public --provenance
+
+      - name: Create GitHub Release Asset
+        if: github.event_name == 'release'
+        working-directory: jupyterlab-hurl-extension
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ASSET=$(ls *.tgz)
+          gh release upload ${{ github.ref_name }} $ASSET

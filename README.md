@@ -64,6 +64,11 @@ pip install jupyter-hurl-kernel
 install-hurl-kernel --sys-prefix
 ```
 
+**For JupyterLab 4.x users:** You also need to install the syntax highlighting extension:
+```bash
+jupyter labextension install jupyterlab-hurl-extension
+```
+
 ### From Source
 
 1. Clone or download this repository:
@@ -87,7 +92,12 @@ For installation in a virtual environment:
 install-hurl-kernel --sys-prefix
 ```
 
-4. Verify the kernel is installed:
+4. **(JupyterLab 4.x only)** Install the syntax highlighting extension:
+```bash
+jupyter labextension install jupyterlab-hurl-extension
+```
+
+5. Verify the kernel is installed:
 ```bash
 jupyter kernelspec list
 ```
@@ -214,7 +224,15 @@ Requests using GET should only retrieve data.
 
 ### Syntax Highlighting
 
-The kernel includes a custom CodeMirror mode that provides syntax highlighting for Hurl files:
+**Important:** Syntax highlighting setup depends on your Jupyter environment:
+
+- **JupyterLab 4.x**: Requires installing a separate extension:
+  ```bash
+  jupyter labextension install jupyterlab-hurl-extension
+  ```
+- **JupyterLab 3.x or Classic Jupyter Notebook**: Works automatically after running `install-hurl-kernel`
+
+The kernel includes syntax highlighting support that provides:
 
 - **HTTP Methods** (GET, POST, etc.) - highlighted as keywords
 - **URLs** - highlighted as strings
@@ -245,10 +263,14 @@ The kernel works by:
 If autocompletion or syntax highlighting isn't working on your Jupyter server, see the detailed [TROUBLESHOOTING.md](TROUBLESHOOTING.md) guide.
 
 **Quick fixes:**
-1. Clear browser cache and hard refresh (Ctrl+Shift+R)
-2. Restart Jupyter server
-3. Reinstall kernel: `install-hurl-kernel --sys-prefix` (for servers/virtual environments)
-4. If using JupyterLab 4, try classic Jupyter Notebook instead: `jupyter notebook`
+1. **JupyterLab 4.x users**: Install the extension from npm:
+   ```bash
+   jupyter labextension install jupyterlab-hurl-extension
+   ```
+2. Clear browser cache and hard refresh (Ctrl+Shift+R)
+3. Restart Jupyter server
+4. Reinstall kernel: `install-hurl-kernel --sys-prefix` (for servers/virtual environments)
+5. If you don't want to install the extension, use classic Jupyter Notebook instead: `jupyter notebook`
 
 ### "hurl is not installed" error
 
@@ -299,27 +321,6 @@ uv build
 # Check the distribution
 uv tool run twine check dist/*
 ```
-
-### Releasing a New Version
-
-This project uses GitHub Actions with PyPI trusted publishing for releases. The version is automatically bumped from the release tag.
-
-1. Commit and push your changes to master
-2. Create and push a new tag with the version number:
-   ```bash
-   git tag v0.1.1
-   git push origin v0.1.1
-   ```
-3. Create a GitHub release from the tag
-4. The GitHub Action will automatically:
-   - Extract the version from the tag
-   - Update `pyproject.toml` with the new version
-   - Commit the version bump back to the repository
-   - Build and publish to PyPI
-
-**Note:** You don't need to manually update the version in `pyproject.toml` - it's automatically updated from the Git tag.
-
-For more details on setting up PyPI trusted publishing, see [.github/PYPI_SETUP.md](.github/PYPI_SETUP.md).
 
 ## Uninstallation
 
