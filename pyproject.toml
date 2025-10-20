@@ -1,6 +1,6 @@
 [project]
 name = "jupyter-hurl-kernel"
-version = "0.1.0"
+version = "0.0.1"
 description = "A Jupyter kernel for running Hurl commands"
 readme = "README.md"
 authors = [
