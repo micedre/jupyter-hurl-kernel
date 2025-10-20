@@ -292,17 +292,22 @@ uv tool run twine check dist/*
 
 ### Releasing a New Version
 
-This project uses GitHub Actions with PyPI trusted publishing for releases.
+This project uses GitHub Actions with PyPI trusted publishing for releases. The version is automatically bumped from the release tag.
 
-1. Update the version in `pyproject.toml`
-2. Commit and push your changes
-3. Create and push a new tag:
+1. Commit and push your changes to master
+2. Create and push a new tag with the version number:
    ```bash
    git tag v0.1.1
    git push origin v0.1.1
    ```
-4. Create a GitHub release from the tag
-5. The GitHub Action will automatically build and publish to PyPI
+3. Create a GitHub release from the tag
+4. The GitHub Action will automatically:
+   - Extract the version from the tag
+   - Update `pyproject.toml` with the new version
+   - Commit the version bump back to the repository
+   - Build and publish to PyPI
+
+**Note:** You don't need to manually update the version in `pyproject.toml` - it's automatically updated from the Git tag.
 
 For more details on setting up PyPI trusted publishing, see [.github/PYPI_SETUP.md](.github/PYPI_SETUP.md).
 

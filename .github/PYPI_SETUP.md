@@ -53,15 +53,21 @@ For testing the publishing workflow before releasing to production PyPI:
 
 Once everything is configured:
 
-1. Update version in `pyproject.toml`
-2. Commit and push changes
-3. Create a new release on GitHub:
+1. Commit and push your changes to the master branch
+2. Create a new tag with the version number:
    ```bash
    git tag v0.1.0
    git push origin v0.1.0
    ```
-4. Or use GitHub's release interface to create a new release
-5. The workflow will automatically trigger and publish to PyPI
+3. Create a GitHub release from the tag (using GitHub's release interface)
+4. The workflow will automatically:
+   - Extract the version from the tag (e.g., `v0.1.0` → `0.1.0`)
+   - Update `pyproject.toml` with the new version
+   - Commit the version bump back to the repository
+   - Build the package
+   - Publish to PyPI
+
+**Important:** Don't manually update the version in `pyproject.toml` - the workflow does this automatically from the Git tag.
 
 ## Testing the Workflow
 

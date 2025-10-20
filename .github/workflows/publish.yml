@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # Allow manual triggering
 
 permissions:
-  contents: read
+  contents: write  # Needed to push version bump commit
 
 jobs:
   build:
@@ -15,6 +15,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch all history for version bumping
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -25,6 +27,29 @@ jobs:
       uses: astral-sh/setup-uv@v4
       with:
         version: "latest"
+
+    - name: Extract version from tag and update pyproject.toml
+      if: github.event_name == 'release'
+      run: |
+        # Extract version from tag (remove 'v' prefix if present)
+        VERSION=${GITHUB_REF#refs/tags/}
+        VERSION=${VERSION#v}
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Extracted version: $VERSION"
+
+        # Use uv to update version in pyproject.toml
+        uv version "$VERSION"
+        echo "Updated pyproject.toml to version $VERSION"
+        cat pyproject.toml | grep "^version"
+
+    - name: Commit version bump
+      if: github.event_name == 'release'
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add pyproject.toml
+        git commit -m "Bump version to $VERSION [skip ci]" || echo "No changes to commit"
+        git push origin HEAD:${GITHUB_REF#refs/heads/} || git push origin HEAD:master || true
 
     - name: Build package
       run: uv build
