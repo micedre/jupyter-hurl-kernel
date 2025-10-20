@@ -13,100 +13,166 @@
 
   if (!CodeMirror) return;
 
-  CodeMirror.defineMode("hurl", function() {
+  CodeMirror.defineMode("hurl", function(config, parserConfig) {
     return {
       startState: function() {
         return {
-          inSection: false,
-          inHeader: false,
-          inAssert: false
+          inSection: null,        // Track current section type
+          inMultilineString: false,
+          lineStart: true
         };
       },
 
       token: function(stream, state) {
-        // Magic lines
-        if (stream.match(/^%%\s*(include|verbose)\b/)) {
-          return "meta";
+        // Track if we're at the start of a line
+        if (stream.sol()) {
+          state.lineStart = true;
+          state.inSection = null; // Reset section tracking at line start
         }
 
-        // HTTP methods at start of line
-        if (stream.sol() && stream.match(/^(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\b/)) {
-          return "keyword";
+        // Skip whitespace but track position
+        if (stream.eatSpace()) {
+          return null;
         }
 
-        // URLs
-        if (stream.match(/https?:\/\/[^\s]+/)) {
-          return "string";
-        }
-
-        // Section headers
-        if (stream.match(/^\[(QueryStringParams|FormParams|MultipartFormData|Cookies|Captures|Asserts|Options|BasicAuth)\]/)) {
-          state.inSection = true;
-          return "header";
-        }
-
-        // HTTP version and status
-        if (stream.match(/^HTTP\/[\d.]+/)) {
-          return "keyword";
-        }
-        if (stream.match(/^\d{3}\b/)) {
-          return "number";
-        }
-
-        // Headers (key: value)
-        if (stream.match(/^[A-Za-z][\w-]*:/)) {
-          state.inHeader = true;
-          return "attribute";
-        }
-
-        // Common assertions
-        if (stream.match(/\b(status|header|cookie|body|bytes|xpath|jsonpath|regex|variable|duration|sha256|md5)\b/)) {
-          return "builtin";
-        }
-
-        // Operators
-        if (stream.match(/==|!=|>|<|>=|<=|contains|startsWith|endsWith|matches/)) {
-          return "operator";
-        }
-
-        // Numbers
-        if (stream.match(/\b\d+(\.\d+)?\b/)) {
-          return "number";
-        }
-
-        // Strings in quotes
-        if (stream.match(/"([^"\\]|\\.)*"/)) {
-          return "string";
-        }
-        if (stream.match(/'([^'\\]|\\.)*'/)) {
-          return "string";
-        }
-
-        // JSONPath expressions
-        if (stream.match(/\$\.[^\s]+/)) {
-          return "variable-2";
-        }
-
-        // XPath expressions
-        if (stream.match(/\/\/[^\s]+/)) {
-          return "variable-2";
-        }
-
-        // Comments
+        // Comments (# at any position)
         if (stream.match(/#.*/)) {
           return "comment";
         }
 
-        // JSON body delimiters
-        if (stream.match(/[{}\[\]]/)) {
+        // Magic lines (must be at start of line)
+        if (state.lineStart && stream.match(/%%\s*(include|verbose)\s*$/)) {
+          state.lineStart = false;
+          return "meta";
+        }
+
+        // HTTP methods (must be at start of line)
+        if (state.lineStart && stream.match(/\b(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\b/)) {
+          state.lineStart = false;
+          return "keyword";
+        }
+
+        // URLs (after HTTP methods or standalone)
+        if (stream.match(/https?:\/\/[^\s]+/)) {
+          return "string-2";
+        }
+
+        // Section headers like [QueryStringParams], [Asserts], etc.
+        if (stream.match(/\[(QueryStringParams|FormParams|MultipartFormData|Cookies|Captures|Asserts|Options|BasicAuth)\]/)) {
+          state.inSection = stream.current().slice(1, -1); // Store section name
+          return "header";
+        }
+
+        // HTTP version (HTTP/1.1, HTTP/2, etc.)
+        if (stream.match(/HTTP\/[\d.]+/)) {
+          return "keyword";
+        }
+
+        // HTTP status codes (200, 404, etc.)
+        if (stream.match(/\b\d{3}\b/)) {
+          return "number";
+        }
+
+        // Headers (Content-Type:, Authorization:, etc.)
+        // More strict: must be at start of line or after whitespace
+        if (stream.match(/[A-Za-z][A-Za-z0-9-]*\s*:/)) {
+          return "attribute";
+        }
+
+        // Assertion keywords (specific to Hurl)
+        if (stream.match(/\b(status|header|cookie|body|bytes|xpath|jsonpath|regex|variable|duration|sha256|md5|count|isInteger|isFloat|isBoolean|isString|isCollection|exists|includes|startsWith|endsWith|contains|matches|equals)\b/)) {
+          return "builtin";
+        }
+
+        // Comparison operators
+        if (stream.match(/==|!=|>=|<=|>|<|\b(not\s+)?(contains|startsWith|endsWith|matches|exists|includes|isInteger|isFloat|isBoolean|isString|isCollection)\b/)) {
+          return "operator";
+        }
+
+        // Numbers (integers and floats)
+        if (stream.match(/\b\d+\.?\d*([eE][+-]?\d+)?\b/)) {
+          return "number";
+        }
+
+        // Boolean values
+        if (stream.match(/\b(true|false|null)\b/)) {
+          return "atom";
+        }
+
+        // Quoted strings (double quotes)
+        if (stream.match(/"([^"\\]|\\.)*"/)) {
+          return "string";
+        }
+
+        // Quoted strings (single quotes)
+        if (stream.match(/'([^'\\]|\\.)*'/)) {
+          return "string";
+        }
+
+        // Triple-quoted strings (multiline strings in Hurl)
+        if (stream.match(/```/)) {
+          state.inMultilineString = !state.inMultilineString;
+          return "string";
+        }
+
+        if (state.inMultilineString) {
+          stream.skipToEnd();
+          return "string";
+        }
+
+        // JSONPath expressions ($.path.to.value)
+        if (stream.match(/\$\.[a-zA-Z_][\w\[\].]*/)) {
+          return "variable-2";
+        }
+
+        // XPath expressions (//path or /path)
+        if (stream.match(/\/\/[^\s]+|\/[a-zA-Z][^\s]*/)) {
+          return "variable-2";
+        }
+
+        // JSON/bracket delimiters
+        if (stream.match(/[{}\[\]()]/)) {
           return "bracket";
         }
 
+        // Colons (for key-value pairs)
+        if (stream.match(/:/)) {
+          return "operator";
+        }
+
+        // Commas
+        if (stream.match(/,/)) {
+          return null;
+        }
+
+        // Template expressions {{variable}}
+        if (stream.match(/\{\{[^}]+\}\}/)) {
+          return "variable";
+        }
+
+        // Capture any other word/identifier
+        if (stream.match(/[a-zA-Z_][\w]*/)) {
+          state.lineStart = false;
+          return "variable";
+        }
+
+        // Move to next character if nothing matched
         stream.next();
+        state.lineStart = false;
         return null;
-      }
+      },
+
+      lineComment: "#"
     };
   });
 
   CodeMirror.defineMIME("text/x-hurl", "hurl");
+
+  // Also register common file extension
+  CodeMirror.modeInfo.push({
+    name: "Hurl",
+    mime: "text/x-hurl",
+    mode: "hurl",
+    ext: ["hurl"]
+  });
 });
