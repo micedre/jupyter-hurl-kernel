@@ -27,14 +27,6 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      - name: Install JupyterLab
-        run: |
-          pip install jupyterlab>=4.0.0
 
       - name: Get version from tag or input
         id: get_version

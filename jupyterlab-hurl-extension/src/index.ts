@@ -9,8 +9,7 @@ import {
 
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 
-import { StreamLanguage } from '@codemirror/language';
-import { tags as t } from '@lezer/highlight';
+import { StreamLanguage, LanguageSupport } from '@codemirror/language';
 
 /**
  * CodeMirror 6 StreamParser for Hurl
@@ -173,11 +172,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
     console.log('JupyterLab Hurl extension is activated!');
 
     // Register the Hurl language
+    const hurlLanguage = StreamLanguage.define(hurlStreamParser);
     languages.addLanguage({
       name: 'hurl',
       mime: 'text/x-hurl',
       extensions: ['.hurl'],
-      support: StreamLanguage.define(hurlStreamParser)
+      support: new LanguageSupport(hurlLanguage)
     });
 
     console.log('Hurl language registered with MIME type: text/x-hurl');
