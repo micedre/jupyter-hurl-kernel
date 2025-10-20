@@ -212,6 +212,23 @@ GET method requests a representation of the specified resource.
 Requests using GET should only retrieve data.
 ```
 
+### Syntax Highlighting
+
+The kernel includes a custom CodeMirror mode that provides syntax highlighting for Hurl files:
+
+- **HTTP Methods** (GET, POST, etc.) - highlighted as keywords
+- **URLs** - highlighted as strings
+- **Headers** - highlighted as attributes
+- **Section headers** ([Asserts], [Captures], etc.) - highlighted as headers
+- **Magic lines** (%%include, %%verbose) - highlighted as meta
+- **Assertions** (status, jsonpath, etc.) - highlighted as builtins
+- **Operators** (==, !=, >, <, etc.) - highlighted as operators
+- **Numbers and strings** - appropriately colored
+- **Comments** (#) - highlighted as comments
+- **JSONPath and XPath expressions** - highlighted as variables
+
+The syntax highlighting is automatically installed when you run `install-hurl-kernel`. After installation, you may need to refresh your browser for the highlighting to take effect.
+
 ## How It Works
 
 The kernel works by:

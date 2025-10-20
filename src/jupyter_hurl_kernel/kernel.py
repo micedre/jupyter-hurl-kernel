@@ -17,8 +17,10 @@ class HurlKernel(Kernel):
     language_version = "0.1"
     language_info = {
         "name": "hurl",
-        "mimetype": "text/plain",
+        "mimetype": "text/x-hurl",
         "file_extension": ".hurl",
+        "codemirror_mode": "hurl",
+        "pygments_lexer": "text",
     }
     banner = "Hurl kernel - Execute HTTP requests with Hurl"
 
