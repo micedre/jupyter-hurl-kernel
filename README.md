@@ -240,6 +240,16 @@ The kernel works by:
 
 ## Troubleshooting
 
+### Code completion or syntax highlighting not working
+
+If autocompletion or syntax highlighting isn't working on your Jupyter server, see the detailed [TROUBLESHOOTING.md](TROUBLESHOOTING.md) guide.
+
+**Quick fixes:**
+1. Clear browser cache and hard refresh (Ctrl+Shift+R)
+2. Restart Jupyter server
+3. Reinstall kernel: `install-hurl-kernel --sys-prefix` (for servers/virtual environments)
+4. If using JupyterLab 4, try classic Jupyter Notebook instead: `jupyter notebook`
+
 ### "hurl is not installed" error
 
 Make sure Hurl is installed and available in your PATH:

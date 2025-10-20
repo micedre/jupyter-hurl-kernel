@@ -13,7 +13,7 @@ dependencies = [
 ]
 
 [project.scripts]
-install-hurl-kernel = "jupyter_hurl_kernel:install_kernel"
+install-hurl-kernel = "jupyter_hurl_kernel:main"
 
 [build-system]
 requires = ["uv_build>=0.9.4,<0.10.0"]

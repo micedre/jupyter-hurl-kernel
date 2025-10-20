@@ -48,13 +48,25 @@ def install_kernel(user=True, prefix=None):
             try:
                 # Get Jupyter data directory
                 data_dir = Path(jupyter_data_dir())
+
+                # Install for classic Jupyter Notebook
                 codemirror_dest_dir = data_dir / "nbextensions" / "codemirror" / "mode" / "hurl"
                 codemirror_dest_dir.mkdir(parents=True, exist_ok=True)
-
-                # Copy the mode file
                 codemirror_dest = codemirror_dest_dir / "hurl.js"
                 shutil.copy2(codemirror_src, codemirror_dest)
-                print(f"Installed CodeMirror mode to: {codemirror_dest}")
+                print(f"Installed CodeMirror mode for Notebook to: {codemirror_dest}")
+
+                # Also try to install for JupyterLab (labextensions path)
+                # JupyterLab 3+ can use custom CodeMirror modes if placed correctly
+                lab_dest_dir = data_dir / "lab" / "static" / "codemirror" / "mode" / "hurl"
+                try:
+                    lab_dest_dir.mkdir(parents=True, exist_ok=True)
+                    lab_dest = lab_dest_dir / "hurl.js"
+                    shutil.copy2(codemirror_src, lab_dest)
+                    print(f"Installed CodeMirror mode for JupyterLab to: {lab_dest}")
+                except Exception:
+                    pass  # JupyterLab path may not exist, that's ok
+
             except Exception as e:
                 print(f"Warning: Could not install CodeMirror mode: {e}", file=sys.stderr)
                 print("Syntax highlighting may not work properly.", file=sys.stderr)
