@@ -16,7 +16,10 @@ dependencies = [
 install-hurl-kernel = "jupyter_hurl_kernel:main"
 
 [build-system]
-requires = ["uv_build>=0.9.4,<0.10.0"]
+requires = [
+    "uv_build>=0.9.4,<0.10.0",
+    "jupyterlab>=4.0.0",
+]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]
@@ -50,10 +53,7 @@ exclude = ["jupyter_hurl_kernel.labextension_src", "jupyter_hurl_kernel.labexten
 [tool.setuptools.package-data]
 jupyter_hurl_kernel = [
     "labextension/*.json",
-    "labextension/lib/*.js",
-    "labextension/lib/*.d.ts",
-    "labextension/style/*.css",
-    "labextension/style/*.js",
+    "labextension/static/*.*",
     "labextension_src/install.json",
     "resources/**/*",
 ]

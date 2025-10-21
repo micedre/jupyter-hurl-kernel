@@ -45,7 +45,6 @@
     "clean:all": "npm run clean:lib && npm run clean:labextension && npm run clean:lintcache",
     "eslint": "npm run eslint:check -- --fix",
     "eslint:check": "eslint . --cache --ext .ts,.tsx",
-    "install:extension": "npm run build",
     "lint": "npm run stylelint && npm run prettier && npm run eslint",
     "lint:check": "npm run stylelint:check && npm run prettier:check && npm run eslint:check",
     "prettier": "npm run prettier:base -- --write --list-different",
@@ -58,10 +57,10 @@
     "watch:labextension": "jupyter labextension watch ."
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0",
-    "@jupyterlab/codemirror": "^4.0.0",
     "@codemirror/language": "^6.0.0",
     "@codemirror/state": "^6.0.0",
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/codemirror": "^4.0.0",
     "@lezer/highlight": "^1.0.0",
     "@lezer/lr": "^1.0.0"
   },
@@ -102,7 +101,9 @@
     },
     "discovery": {
       "server": {
-        "managers": ["pip"],
+        "managers": [
+          "pip"
+        ],
         "base": {
           "name": "jupyter_hurl_kernel"
         }
