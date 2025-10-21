@@ -26,13 +26,6 @@ def build_extension():
         print("Skipping extension build.")
         return
 
-    # Check if already built
-    package_json = labext_dest / "package.json"
-    if package_json.exists():
-        print(f"Extension already built at {labext_dest}")
-        print("Skipping build.")
-        return
-
     print(f"Source: {labext_src}")
     print(f"Destination: {labext_dest}")
 
@@ -61,22 +54,85 @@ def build_extension():
 
         print("✓ Dependencies installed")
 
-        # Build the extension
-        print("\n🔨 Building extension...")
+        # Build the TypeScript library
+        print("\n🔨 Building TypeScript library...")
         result = subprocess.run(
-            ["npm", "run", "build:prod"],
+            ["npm", "run", "build:lib:prod"],
             capture_output=True,
             text=True,
             check=False
         )
 
         if result.returncode != 0:
-            print("Error building extension:")
+            print("Error building TypeScript:")
             print(result.stderr)
             print("⚠️  Extension build failed, but continuing package build...")
             return
 
-        print("✓ Extension built successfully")
+        print("✓ TypeScript compiled successfully")
+
+        # Manually create the labextension structure
+        print("\n📦 Creating labextension package...")
+        import shutil
+        import json
+
+        # Create labextension directory
+        labext_dest.mkdir(parents=True, exist_ok=True)
+
+        # Copy compiled lib directory
+        lib_src = labext_src / "lib"
+        lib_dest = labext_dest / "lib"
+        if lib_src.exists():
+            if lib_dest.exists():
+                shutil.rmtree(lib_dest)
+            shutil.copytree(lib_src, lib_dest)
+            print(f"  ✓ Copied lib/ to {lib_dest}")
+
+        # Copy style directory if exists
+        style_src = labext_src / "style"
+        style_dest = labext_dest / "style"
+        if style_src.exists():
+            if style_dest.exists():
+                shutil.rmtree(style_dest)
+            shutil.copytree(style_src, style_dest)
+            print(f"  ✓ Copied style/ to {style_dest}")
+
+        # Copy schema directory if exists
+        schema_src = labext_src / "schema"
+        schema_dest = labext_dest / "schema"
+        if schema_src.exists():
+            if schema_dest.exists():
+                shutil.rmtree(schema_dest)
+            shutil.copytree(schema_src, schema_dest)
+            print(f"  ✓ Copied schema/ to {schema_dest}")
+
+        # Copy package.json
+        pkg_json_src = labext_src / "package.json"
+        pkg_json_dest = labext_dest / "package.json"
+        if pkg_json_src.exists():
+            shutil.copy2(pkg_json_src, pkg_json_dest)
+            print(f"  ✓ Copied package.json")
+
+        # Create install.json if it doesn't exist
+        install_json_src = labext_src / "install.json"
+        if install_json_src.exists():
+            install_json_dest = labext_dest / "install.json"
+            shutil.copy2(install_json_src, install_json_dest)
+            print(f"  ✓ Copied install.json")
+
+        print("✓ Extension packaged successfully")
+
+        # Clean up node_modules to avoid including in package
+        print("\n🧹 Cleaning up build artifacts...")
+        node_modules = labext_src / "node_modules"
+        if node_modules.exists():
+            shutil.rmtree(node_modules)
+            print("  ✓ Removed node_modules")
+
+        lib_dir = labext_src / "lib"
+        if lib_dir.exists():
+            shutil.rmtree(lib_dir)
+            print("  ✓ Removed lib/")
 
         # Verify output
         if labext_dest.exists():

@@ -1,0 +1,27 @@
+# Include package metadata
+include pyproject.toml
+include README.md
+include LICENSE
+include build_labextension.py
+
+# Include kernel resources
+recursive-include src/jupyter_hurl_kernel/resources *
+
+# Include built labextension (not source)
+recursive-include src/jupyter_hurl_kernel/labextension *.js *.json *.css *.ts *.d.ts
+include src/jupyter_hurl_kernel/labextension_src/install.json
+
+# Explicitly exclude labextension_src except install.json
+prune src/jupyter_hurl_kernel/labextension_src
+include src/jupyter_hurl_kernel/labextension_src/install.json
+
+# Exclude unnecessary files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .DS_Store
+global-exclude *.so
+global-exclude *.dylib
+recursive-exclude * .git*
+recursive-exclude * node_modules
+recursive-exclude * .ipynb_checkpoints

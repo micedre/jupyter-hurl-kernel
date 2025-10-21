@@ -81,6 +81,30 @@ def install_kernel(user=True, prefix=None):
                 print(f"Warning: Could not install CodeMirror mode: {e}", file=sys.stderr)
                 print("Syntax highlighting may not work properly.", file=sys.stderr)
 
+        # Install JupyterLab extension
+        labext_src = Path(__file__).parent / "labextension"
+        if labext_src.exists():
+            try:
+                data_dir = Path(jupyter_data_dir())
+                labext_dest_dir = data_dir / "labextensions" / "jupyterlab-hurl-extension"
+
+                # Remove old version if exists
+                if labext_dest_dir.exists():
+                    shutil.rmtree(labext_dest_dir)
+
+                # Copy extension
+                shutil.copytree(labext_src, labext_dest_dir)
+                print(f"Installed JupyterLab extension to: {labext_dest_dir}")
+
+                # Copy install.json
+                install_json_src = Path(__file__).parent / "labextension_src" / "install.json"
+                if install_json_src.exists():
+                    shutil.copy2(install_json_src, labext_dest_dir / "install.json")
+
+            except Exception as e:
+                print(f"Warning: Could not install JupyterLab extension: {e}", file=sys.stderr)
+                print("JupyterLab 4 syntax highlighting may not work.", file=sys.stderr)
+
         print("\nTo use the kernel, start Jupyter:")
         print("  jupyter notebook")
         print("  or")

@@ -94,9 +94,10 @@ before-build = ["python build_labextension.py"]
 ### build_labextension.py
 
 Custom build script that:
-- Checks if extension is already built
 - Runs `npm install` to get dependencies
-- Runs `npm run build:prod` to compile TypeScript
+- Runs `npm run build:lib:prod` to compile TypeScript
+- Manually packages the labextension (lib/, style/, package.json, install.json)
+- Cleans up node_modules and build artifacts from labextension_src
 - Handles errors gracefully (won't fail package build if npm is missing)
 
 ### Package Data
@@ -106,9 +107,19 @@ The following files are included in the distribution:
 ```python
 [tool.setuptools.package-data]
 jupyter_hurl_kernel = [
-    "labextension/**/*",           # Compiled extension
+    "labextension/*.json",          # Extension metadata
+    "labextension/lib/*.js",        # Compiled JS
+    "labextension/lib/*.d.ts",      # TypeScript definitions
+    "labextension/style/*.css",     # Styles
     "labextension_src/install.json", # Extension metadata
-    "resources/**/*",              # Kernel spec and CM5 mode
+    "resources/**/*",               # Kernel spec and CM5 mode
+]
+
+# Exclude source files and build artifacts
+[tool.uv.build-backend]
+source-exclude = [
+    "src/jupyter_hurl_kernel/labextension_src/node_modules",
+    "src/jupyter_hurl_kernel/labextension_src/lib",
 ]
 ```
 

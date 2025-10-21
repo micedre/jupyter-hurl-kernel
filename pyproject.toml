@@ -22,6 +22,11 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 # Custom build script to include JupyterLab extension
 before-build = ["python build_labextension.py"]
+# Exclude labextension_src from distribution
+source-exclude = [
+    "src/jupyter_hurl_kernel/labextension_src/node_modules",
+    "src/jupyter_hurl_kernel/labextension_src/lib",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -39,17 +44,15 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["jupyter_hurl_kernel*"]
+include = ["jupyter_hurl_kernel"]
+exclude = ["jupyter_hurl_kernel.labextension_src", "jupyter_hurl_kernel.labextension_src.*"]
 
 [tool.setuptools.package-data]
 jupyter_hurl_kernel = [
-    "labextension/**/*",
+    "labextension/*.json",
+    "labextension/lib/*.js",
+    "labextension/lib/*.d.ts",
+    "labextension/style/*.css",
     "labextension_src/install.json",
     "resources/**/*",
-]
-
-[tool.setuptools.data-files]
-"share/jupyter/labextensions/jupyterlab-hurl-extension" = [
-    "src/jupyter_hurl_kernel/labextension/**/*",
-    "src/jupyter_hurl_kernel/labextension_src/install.json",
 ]
