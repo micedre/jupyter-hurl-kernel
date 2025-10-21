@@ -58,16 +58,15 @@ pip install jupyter-hurl-kernel
 install-hurl-kernel
 ```
 
-For installation in a virtual environment:
+For installation in a virtual environment or server:
 ```bash
 pip install jupyter-hurl-kernel
 install-hurl-kernel --sys-prefix
 ```
 
-**For JupyterLab 4.x users:** You also need to install the syntax highlighting extension:
-```bash
-jupyter labextension install jupyterlab-hurl-extension
-```
+**That's it!** The package includes syntax highlighting for both:
+- **JupyterLab 4.x** (automatic via bundled extension)
+- **JupyterLab 3.x and Classic Jupyter Notebook** (automatic via CodeMirror 5 mode)
 
 ### From Source
 
@@ -92,12 +91,7 @@ For installation in a virtual environment:
 install-hurl-kernel --sys-prefix
 ```
 
-4. **(JupyterLab 4.x only)** Install the syntax highlighting extension:
-```bash
-jupyter labextension install jupyterlab-hurl-extension
-```
-
-5. Verify the kernel is installed:
+4. Verify the kernel is installed:
 ```bash
 jupyter kernelspec list
 ```
@@ -224,15 +218,12 @@ Requests using GET should only retrieve data.
 
 ### Syntax Highlighting
 
-**Important:** Syntax highlighting setup depends on your Jupyter environment:
+The kernel includes built-in syntax highlighting for all Jupyter environments:
 
-- **JupyterLab 4.x**: Requires installing a separate extension:
-  ```bash
-  jupyter labextension install jupyterlab-hurl-extension
-  ```
-- **JupyterLab 3.x or Classic Jupyter Notebook**: Works automatically after running `install-hurl-kernel`
+- **JupyterLab 4.x**: Uses bundled CodeMirror 6 extension (automatically enabled)
+- **JupyterLab 3.x and Classic Jupyter Notebook**: Uses CodeMirror 5 mode (automatically enabled)
 
-The kernel includes syntax highlighting support that provides:
+Syntax highlighting provides:
 
 - **HTTP Methods** (GET, POST, etc.) - highlighted as keywords
 - **URLs** - highlighted as strings
@@ -263,14 +254,11 @@ The kernel works by:
 If autocompletion or syntax highlighting isn't working on your Jupyter server, see the detailed [TROUBLESHOOTING.md](TROUBLESHOOTING.md) guide.
 
 **Quick fixes:**
-1. **JupyterLab 4.x users**: Install the extension from npm:
-   ```bash
-   jupyter labextension install jupyterlab-hurl-extension
-   ```
-2. Clear browser cache and hard refresh (Ctrl+Shift+R)
-3. Restart Jupyter server
-4. Reinstall kernel: `install-hurl-kernel --sys-prefix` (for servers/virtual environments)
-5. If you don't want to install the extension, use classic Jupyter Notebook instead: `jupyter notebook`
+1. Clear browser cache and hard refresh (Ctrl+Shift+R)
+2. Restart Jupyter server completely
+3. Reinstall: `pip install --upgrade --force-reinstall jupyter-hurl-kernel`
+4. Verify extension is loaded: `jupyter labextension list` (should show jupyterlab-hurl-extension)
+5. Check browser console (F12) for JavaScript errors
 
 ### "hurl is not installed" error
 

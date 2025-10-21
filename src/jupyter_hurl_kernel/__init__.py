@@ -8,6 +8,16 @@ from pathlib import Path
 from jupyter_client.kernelspec import KernelSpecManager
 from jupyter_core.paths import jupyter_data_dir
 
+__version__ = "0.0.7"
+
+
+def _jupyter_labextension_paths():
+    """Called by JupyterLab to get the extension metadata."""
+    return [{
+        "src": "labextension",
+        "dest": "jupyterlab-hurl-extension"
+    }]
+
 
 def install_kernel(user=True, prefix=None):
     """Install the Hurl kernel specification.

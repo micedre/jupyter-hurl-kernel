@@ -1,4 +1,4 @@
-name: Publish JupyterLab Extension to npm
+name: Publish JupyterLab Extension
 
 on:
   release:
@@ -11,11 +11,11 @@ on:
         type: string
 
 jobs:
-  publish-npm:
+  publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Required for uploading release assets
-      id-token: write  # Required for npm provenance
+      id-token: write  # Required for npm and PyPI trusted publishing
 
     steps:
       - name: Checkout code
@@ -26,6 +26,11 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
 
       - name: Get version from tag or input
@@ -76,11 +81,25 @@ jobs:
         run: |
           npm publish --access public --provenance
 
-      - name: Create GitHub Release Asset
+      - name: Build Python package
+        working-directory: jupyterlab-hurl-extension
+        run: |
+          python -m pip install build hatch hatch-nodejs-version hatch-jupyter-builder
+          python -m pip install jupyterlab>=4.0.0
+          python -m build
+
+      - name: Publish to PyPI
+        if: success()
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: jupyterlab-hurl-extension/dist/
+
+      - name: Upload GitHub Release Assets
         if: github.event_name == 'release'
         working-directory: jupyterlab-hurl-extension
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ASSET=$(ls *.tgz)
-          gh release upload ${{ github.ref_name }} $ASSET
+          gh release upload ${{ github.ref_name }} *.tgz
+          gh release upload ${{ github.ref_name }} dist/*.whl
+          gh release upload ${{ github.ref_name }} dist/*.tar.gz

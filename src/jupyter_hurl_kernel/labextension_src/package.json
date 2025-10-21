@@ -31,12 +31,13 @@
     "url": "https://github.com/micedre/jupyter-hurl-kernel.git"
   },
   "scripts": {
-    "build": "npm run build:lib",
-    "build:prod": "npm run clean && npm run build:lib:prod",
+    "build": "npm run build:lib && npm run build:labextension:dev",
+    "build:prod": "npm run clean && npm run build:lib:prod && npm run build:labextension",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
     "build:lib": "tsc --sourceMap",
     "build:lib:prod": "tsc",
+    "install:extension": "npm run build",
     "clean": "npm run clean:lib",
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
     "clean:lintcache": "rimraf .eslintcache .stylelintcache",
@@ -92,11 +93,19 @@
   },
   "jupyterlab": {
     "extension": true,
-    "outputDir": "jupyterlab_hurl_extension/labextension",
+    "outputDir": "../labextension",
     "sharedPackages": {
       "@jupyterlab/codemirror": {
         "bundled": false,
         "singleton": true
+      }
+    },
+    "discovery": {
+      "server": {
+        "managers": ["pip"],
+        "base": {
+          "name": "jupyter_hurl_kernel"
+        }
       }
     }
   }
