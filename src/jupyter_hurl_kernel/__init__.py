@@ -8,7 +8,7 @@ from pathlib import Path
 from jupyter_client.kernelspec import KernelSpecManager
 from jupyter_core.paths import jupyter_data_dir
 
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 
 
 def _jupyter_labextension_paths():

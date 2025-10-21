@@ -53,6 +53,7 @@ jupyter_hurl_kernel = [
     "labextension/lib/*.js",
     "labextension/lib/*.d.ts",
     "labextension/style/*.css",
+    "labextension/style/*.js",
     "labextension_src/install.json",
     "resources/**/*",
 ]
