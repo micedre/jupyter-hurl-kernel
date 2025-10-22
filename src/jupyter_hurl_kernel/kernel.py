@@ -46,30 +46,38 @@ class HurlKernel(Kernel):
             self.hurl_version = None
 
     def _parse_magic_line(self, code):
-        """Parse magic line (%%include or %%verbose) from code.
+        """Parse magic line (%%include, %%verbose, or %%output=filename) from code.
 
         Args:
             code: The code to parse
 
         Returns:
-            tuple: (hurl_code, mode) where mode is 'normal', 'include', or 'verbose'
+            tuple: (hurl_code, mode, output_file) where:
+                - mode is 'normal', 'include', or 'verbose'
+                - output_file is the filename from %%output=filename or None
         """
         lines = code.split('\n')
         mode = 'normal'
+        output_file = None
         hurl_code_lines = []
 
         for line in lines:
             if line.strip().startswith('%%'):
                 # Parse magic line
-                magic = line.strip()[2:].lower()
-                if magic == 'include':
+                magic = line.strip()[2:]
+                magic_lower = magic.lower()
+
+                if magic_lower == 'include':
                     mode = 'include'
-                elif magic == 'verbose':
+                elif magic_lower == 'verbose':
                     mode = 'verbose'
+                elif magic_lower.startswith('output='):
+                    # Extract filename from %%output=filename
+                    output_file = magic[7:].strip()  # Remove 'output=' prefix
             else:
                 hurl_code_lines.append(line)
 
-        return '\n'.join(hurl_code_lines), mode
+        return '\n'.join(hurl_code_lines), mode, output_file
 
     def do_execute(
         self,
@@ -120,7 +128,7 @@ class HurlKernel(Kernel):
             }
 
         # Parse magic lines and get hurl code
-        hurl_code, mode = self._parse_magic_line(code)
+        hurl_code, mode, output_file = self._parse_magic_line(code)
 
         if not hurl_code.strip():
             return {
@@ -148,6 +156,10 @@ class HurlKernel(Kernel):
                 # --verbose shows all information (request, response, headers, timing, etc.)
                 cmd.insert(1, "--verbose")
 
+            # Add output file option if specified
+            if output_file:
+                cmd.extend(["--output", output_file])
+
             # Execute hurl command
             result = subprocess.run(
                 cmd,
@@ -171,6 +183,21 @@ class HurlKernel(Kernel):
                     "stream",
                     {"name": "stderr", "text": result.stderr},
                 )
+
+            # If output file was written, notify the user
+            if output_file and result.returncode == 0 and not silent:
+                try:
+                    output_path = Path(output_file)
+                    if output_path.exists():
+                        file_size = output_path.stat().st_size
+                        message = f"\nOutput written to: {output_path.absolute()} ({file_size} bytes)\n"
+                        self.send_response(
+                            self.iopub_socket,
+                            "stream",
+                            {"name": "stdout", "text": message},
+                        )
+                except Exception:
+                    pass  # Silently ignore errors in file size checking
 
             # Determine execution status
             if result.returncode == 0:
@@ -273,7 +300,7 @@ class HurlKernel(Kernel):
         hurl_sections = ['[QueryStringParams]', '[FormParams]', '[MultipartFormData]',
                         '[Cookies]', '[Captures]', '[Asserts]', '[Options]', '[BasicAuth]']
 
-        magic_lines = ['%%include', '%%verbose']
+        magic_lines = ['%%include', '%%verbose', '%%output=']
 
         # Determine context and provide relevant completions
         matches = []
@@ -358,10 +385,11 @@ class HurlKernel(Kernel):
         }
 
         # Check for magic lines
-        if word in ['INCLUDE', 'VERBOSE']:
+        if word in ['INCLUDE', 'VERBOSE', 'OUTPUT']:
             doc_text = {
                 'INCLUDE': '%%include magic line\nShows response headers and body (equivalent to hurl --include flag)',
                 'VERBOSE': '%%verbose magic line\nShows all request/response details including headers, timing, etc. (equivalent to hurl --verbose flag)',
+                'OUTPUT': '%%output=filename magic line\nWrites the response body to the specified file (equivalent to hurl --output flag)\nExample: %%output=response.html',
             }.get(word, '')
         elif word in http_methods_docs:
             doc_text = f"HTTP {word} Method\n\n{http_methods_docs[word]}"
